@@ -6,7 +6,7 @@ Groq free tier: 30 requests/minute
 
 import time
 from datetime import datetime, timedelta
-from config import MAX_CALLS_PER_MINUTE
+from notes_agent.config import MAX_CALLS_PER_MINUTE
 
 class RateLimiter:
     def __init__(self, max_calls_per_minute=MAX_CALLS_PER_MINUTE):

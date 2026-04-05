@@ -8,7 +8,7 @@ import json
 import os
 import hashlib
 from datetime import datetime
-from config import CACHE_FILE, ENABLE_CACHE
+from notes_agent.config import CACHE_FILE, ENABLE_CACHE
 
 class CacheManager:
     def __init__(self, cache_file=CACHE_FILE):

@@ -5,10 +5,10 @@ Main fact-checking agent with caching, rate limiting, and real search.
 
 from langchain_groq import ChatGroq
 import json
-from config import GROQ_API_KEY, LLM_MODEL, LLM_TEMPERATURE
-from rate_limiter import limiter
-from cache_manager import cache
-from search_tools import search_evidence
+from notes_agent.config import GROQ_API_KEY, LLM_MODEL, LLM_TEMPERATURE
+from notes_agent.rate_limiter import limiter
+from notes_agent.cache_manager import cache
+from notes_agent.search_tools import search_evidence
 
 # ══════════════════════════════════════════════════════
 # LLM Setup

@@ -4,9 +4,9 @@ Streamlit web interface for the fact-checking agent.
 """
 
 import streamlit as st
-from agent_core import fact_check
-from cache_manager import cache
-from rate_limiter import limiter
+from notes_agent.agent_core import fact_check
+from notes_agent.cache_manager import cache
+from notes_agent.rate_limiter import limiter
 import time
 
 # Page config

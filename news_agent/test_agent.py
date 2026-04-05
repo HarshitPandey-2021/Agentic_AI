@@ -3,8 +3,8 @@
 Test suite for the fact-checking agent.
 """
 
-from agent_core import fact_check
-from cache_manager import cache
+from notes_agent.agent_core import fact_check
+from notes_agent.cache_manager import cache
 
 # Test claims
 TEST_CLAIMS = [
