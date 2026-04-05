@@ -1,0 +1,62 @@
+{
+  "45bbc099d2952d8c3be6d998400def0f": {
+    "claim": "Government is giving ₹5000 to all students",
+    "result": {
+      "claim": "Government is giving ₹5000 to all students",
+      "verdict": "FALSE",
+      "reasoning": "The claim that the government is giving ₹5000 to all students is contradicted by the evidence, which states 'No official announcements found' on the Press Information Bureau (pib.gov.in) website, indicating that there is no official confirmation of such a scheme.",
+      "sources": [
+        "Press Information Bureau (pib.gov.in)"
+      ],
+      "evidence": [
+        "No official announcements found"
+      ],
+      "confidence": "HIGH",
+      "key_facts": [
+        "No official announcements found",
+        "Source: Press Information Bureau (pib.gov.in)"
+      ]
+    },
+    "timestamp": "2026-04-05 09:57:49"
+  },
+  "2ee6d6b03ba580735e3b11dbb8c2f9dc": {
+    "claim": "Eating garlic cures COVID-19",
+    "result": {
+      "claim": "Eating garlic cures COVID-19",
+      "verdict": "FALSE",
+      "reasoning": "The World Health Organization (WHO) has no health guidance that suggests eating garlic cures COVID-19, indicating that there is no credible evidence to support this claim. The lack of evidence from a trusted source like WHO implies that the claim is incorrect. No announcement or guidance from WHO supports the claim that garlic is a cure for COVID-19.",
+      "sources": [
+        "World Health Organization (who.int)"
+      ],
+      "evidence": [
+        "No health guidance found"
+      ],
+      "confidence": "HIGH",
+      "key_facts": [
+        "No health guidance found on WHO website",
+        "WHO is a trusted source for health information"
+      ]
+    },
+    "timestamp": "2026-04-05 09:58:10"
+  },
+  "3dc6933815e3f0c004cad1dbb3fca65b": {
+    "claim": "IS Trump dead!?",
+    "result": {
+      "claim": "Donald Trump is dead",
+      "verdict": "FALSE",
+      "reasoning": "The claim 'Donald Trump is dead' is deemed false as no fact-checks or evidence were found to support this claim, and in the absence of any announcement or confirmation from trusted sources, it is reasonable to conclude that the claim is incorrect.",
+      "sources": [
+        "Fact-checking websites"
+      ],
+      "evidence": [
+        "No fact-checks found for this claim"
+      ],
+      "confidence": "LOW",
+      "key_facts": [
+        "No fact-checks found for this claim",
+        "No announcement or confirmation from trusted sources"
+      ]
+    },
+    "timestamp": "2026-04-05 09:59:50"
+  }
+}
