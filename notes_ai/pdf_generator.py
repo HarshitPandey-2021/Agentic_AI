@@ -108,6 +108,27 @@ def generate_pdf(data, output_path):
         bottomMargin=2*cm
     )
     
+    
+    # Add this at the beginning of generate_pdf() function, after creating the doc:
+
+    # Create output directory if it doesn't exist
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    
+    # Sanitize data to prevent PDF generation errors
+    def sanitize_text(text):
+        """Remove problematic characters for PDF"""
+        if not text:
+            return ""
+        # Remove null bytes and other problematic chars
+        return str(text).replace('\x00', '').replace('\r', '\n')
+    
+    # Sanitize all text fields
+    for key in data:
+        if isinstance(data[key], str):
+            data[key] = sanitize_text(data[key])
+        elif isinstance(data[key], list):
+            data[key] = [sanitize_text(item) if isinstance(item, str) else item for item in data[key]]
+    
     styles = create_styles()
     story = []
     

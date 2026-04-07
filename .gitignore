@@ -2,4 +2,6 @@ __pycache__/
 *.pyc
 cache.json
 config.py
+/config.py
 .env
+notes_ai/config.py

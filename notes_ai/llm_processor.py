@@ -1,147 +1,150 @@
 # llm_processor.py
 """
-LLM Processing - Clean, enhance, and enrich the notes
+LLM Processing - Direct API calls (No OpenAI SDK issues!)
 """
 
-from langchain_groq import ChatGroq
 import json
-from config import GROQ_API_KEY, LLM_MODEL
+import requests
+from config import FEATHERLESS_API_KEY
 
-llm = ChatGroq(
-    model=LLM_MODEL,
-    groq_api_key=GROQ_API_KEY,
-    temperature=0.3
-)
+# Featherless API endpoint
+FEATHERLESS_URL = "https://api.featherless.ai/v1/chat/completions"
+MODEL = "deepseek-ai/DeepSeek-V3.2"
+
+def call_llm(prompt, temperature=0.3, max_tokens=4000):
+    """
+    Call Featherless AI directly (no OpenAI SDK needed!)
+    """
+    try:
+        headers = {
+            "Authorization": f"Bearer {FEATHERLESS_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        
+        payload = {
+            "model": MODEL,
+            "messages": [
+                {"role": "system", "content": "You are an expert educational AI assistant."},
+                {"role": "user", "content": prompt}
+            ],
+            "temperature": temperature,
+            "max_tokens": max_tokens
+        }
+        
+        response = requests.post(FEATHERLESS_URL, json=payload, headers=headers, timeout=60)
+        
+        if response.status_code == 200:
+            result = response.json()
+            return result["choices"][0]["message"]["content"]
+        else:
+            print(f"❌ Featherless API Error: {response.status_code}")
+            print(f"   Response: {response.text[:200]}")
+            return None
+    
+    except Exception as e:
+        print(f"❌ Error calling Featherless: {e}")
+        return None
 
 def clean_and_structure_notes(raw_text, subject=None, topic=None):
-    """
-    Clean up messy OCR text and structure it properly
-    """
+    """Clean and structure notes"""
     
     prompt = f"""You are an expert note-taker and editor.
 
-I have raw text extracted from handwritten notes (via OCR). 
-The text may have:
-- Spelling mistakes
-- Grammar errors
-- Missing words
-- Jumbled sentences
-- Abbreviations
-
-Your job:
-1. Fix all spelling and grammar errors
-2. Expand abbreviations (e.g., "govt" → "government", "b/w" → "between")
-3. Structure into proper headings and bullet points
-4. Fill in obviously missing words
-5. Keep the original meaning intact
-6. Detect the topic if not provided
+I have raw text from class notes. Clean and structure them properly.
 
 {"Subject: " + subject if subject else ""}
 {"Topic: " + topic if topic else ""}
 
-RAW OCR TEXT:
+RAW TEXT:
 \"\"\"
-{raw_text}
+{raw_text[:3000]}
 \"\"\"
 
 OUTPUT FORMAT (JSON):
 {{
     "detected_topic": "topic name",
     "detected_subject": "subject name",
-    "cleaned_notes": "properly formatted notes with headings and bullets",
-    "key_concepts": ["concept1", "concept2", "concept3"],
-    "summary": "2-3 sentence summary of the notes"
+    "cleaned_notes": "properly formatted notes",
+    "key_concepts": ["concept1", "concept2", "concept3", "concept4", "concept5"],
+    "summary": "2-3 sentence summary"
 }}
 
-Output JSON only:
+Return ONLY valid JSON:
 """
     
-    response = llm.invoke(prompt)
+    response = call_llm(prompt, max_tokens=3000)
+    
+    if not response:
+        return {
+            "detected_topic": topic or "Study Notes",
+            "detected_subject": subject or "General",
+            "cleaned_notes": raw_text,
+            "key_concepts": [],
+            "summary": ""
+        }
     
     try:
-        content = response.content.strip()
+        content = response.strip()
         if "```json" in content:
             content = content.split("```json")[1].split("```")[0]
         elif "```" in content:
             content = content.split("```")[1].split("```")[0]
-        
         return json.loads(content.strip())
     except:
         return {
-            "detected_topic": topic or "Unknown Topic",
-            "detected_subject": subject or "Unknown Subject",
+            "detected_topic": topic or "Study Notes",
+            "detected_subject": subject or "General",
             "cleaned_notes": raw_text,
             "key_concepts": [],
             "summary": ""
         }
 
 def generate_analogies(concepts, topic):
-    """
-    Generate simple, relatable analogies for each concept
-    """
+    """Generate analogies"""
     
-    prompt = f"""You are a brilliant teacher who explains complex concepts using simple analogies.
-
+    if not concepts:
+        return {"analogies": []}
+    
+    prompt = f"""Generate simple analogies for these concepts:
 Topic: {topic}
-Key Concepts: {', '.join(concepts)}
-
-For EACH concept, provide:
-1. A simple analogy using everyday objects/situations
-2. An example that a college student would relate to
-3. Why this analogy works
+Concepts: {', '.join(concepts[:5])}
 
 OUTPUT FORMAT (JSON):
 {{
     "analogies": [
         {{
             "concept": "concept name",
-            "analogy": "simple analogy explanation",
+            "analogy": "simple explanation",
             "example": "relatable example",
-            "why_it_works": "brief explanation"
+            "why_it_works": "explanation"
         }}
     ]
 }}
 
-Make analogies:
-- Fun and memorable
-- Using things students know (phones, games, food, social media)
-- Easy to remember during exams
-
-Output JSON only:
+Return ONLY valid JSON:
 """
     
-    response = llm.invoke(prompt)
+    response = call_llm(prompt, max_tokens=2000)
+    
+    if not response:
+        return {"analogies": []}
     
     try:
-        content = response.content.strip()
+        content = response.strip()
         if "```json" in content:
             content = content.split("```json")[1].split("```")[0]
         elif "```" in content:
             content = content.split("```")[1].split("```")[0]
-        
         return json.loads(content.strip())
     except:
         return {"analogies": []}
 
-def generate_questions(notes, topic, num_questions=10):
-    """
-    Generate probable exam questions from the notes
-    """
+def generate_questions(notes, topic):
+    """Generate exam questions"""
     
-    prompt = f"""You are an experienced professor who sets exam papers.
+    prompt = f"""Generate 10 exam questions from these notes about {topic}:
 
-Topic: {topic}
-
-Notes:
-\"\"\"
 {notes[:3000]}
-\"\"\"
-
-Generate {num_questions} probable exam questions:
-- 3 SHORT ANSWER questions (2-3 marks)
-- 3 LONG ANSWER questions (5-10 marks)
-- 2 MCQs with options
-- 2 TRUE/FALSE with explanation
 
 OUTPUT FORMAT (JSON):
 {{
@@ -149,104 +152,94 @@ OUTPUT FORMAT (JSON):
         {{
             "type": "SHORT/LONG/MCQ/TRUE_FALSE",
             "question": "question text",
-            "marks": 2,
-            "hint": "brief hint for answering",
-            "options": ["a", "b", "c", "d"]  // only for MCQ
+            "marks": 5,
+            "hint": "brief hint",
+            "options": ["a", "b", "c", "d"]
         }}
     ]
 }}
 
-Make questions that are:
-- Actually likely to come in exams
-- Cover all key concepts from notes
-- Varying difficulty levels
-
-Output JSON only:
+Return ONLY valid JSON:
 """
     
-    response = llm.invoke(prompt)
+    response = call_llm(prompt, max_tokens=3000)
+    
+    if not response:
+        return {"questions": []}
     
     try:
-        content = response.content.strip()
+        content = response.strip()
         if "```json" in content:
             content = content.split("```json")[1].split("```")[0]
         elif "```" in content:
             content = content.split("```")[1].split("```")[0]
-        
         return json.loads(content.strip())
     except:
         return {"questions": []}
 
 def expand_notes(notes, topic):
-    """
-    Expand brief notes with more details and explanations
-    """
+    """Expand notes"""
     
-    prompt = f"""You are a subject expert and textbook author.
+    prompt = f"""Expand these notes about {topic} with detailed explanations:
 
-Topic: {topic}
+{notes[:2500]}
 
-These are brief class notes:
-\"\"\"
-{notes[:2000]}
-\"\"\"
-
-Expand these notes by:
-1. Adding more detailed explanations for each point
-2. Including relevant formulas (if applicable)
-3. Adding real-world applications
-4. Including "Remember" tips for exams
-5. Adding connecting statements between sections
-
-Keep the same structure but make it more comprehensive.
-Write as if explaining to a student who missed the class.
-
-OUTPUT FORMAT:
-Return the expanded notes as markdown with proper headings (##, ###), 
-bullet points, and emphasis (**bold**, *italic*).
+Return expanded text with headings and bullet points.
 """
     
-    response = llm.invoke(prompt)
-    return response.content
+    response = call_llm(prompt, max_tokens=4000)
+    return response if response else notes
 
 def generate_diagram_queries(topic, concepts):
-    """
-    Generate search queries to find relevant diagrams
-    """
+    """Generate diagram queries"""
     
-    prompt = f"""Topic: {topic}
-Key Concepts: {', '.join(concepts)}
-
-What diagrams/images would help understand this topic?
-
-Generate 3-5 Google Image search queries to find relevant educational diagrams.
+    if not concepts:
+        return {"diagram_queries": []}
+    
+    prompt = f"""Generate 3-5 search queries for diagrams about {topic}.
+Concepts: {', '.join(concepts[:5])}
 
 OUTPUT FORMAT (JSON):
 {{
     "diagram_queries": [
         {{
-            "query": "search query for google images",
-            "description": "what this diagram shows",
-            "relevance": "which concept it explains"
+            "query": "search query",
+            "description": "what this shows",
+            "relevance": "which concept"
         }}
     ]
 }}
 
-Make queries specific enough to find educational diagrams, not random images.
-Example: "TCP three way handshake diagram" not just "TCP"
-
-Output JSON only:
+Return ONLY valid JSON:
 """
     
-    response = llm.invoke(prompt)
+    response = call_llm(prompt, max_tokens=1000)
+    
+    if not response:
+        return {"diagram_queries": []}
     
     try:
-        content = response.content.strip()
+        content = response.strip()
         if "```json" in content:
             content = content.split("```json")[1].split("```")[0]
         elif "```" in content:
             content = content.split("```")[1].split("```")[0]
-        
         return json.loads(content.strip())
     except:
         return {"diagram_queries": []}
+
+# ═══════════════════════════════════════════════════════════════
+# Test
+# ═══════════════════════════════════════════════════════════════
+
+if __name__ == "__main__":
+    print(f"\n✅ LLM Processor loaded!")
+    print(f"📊 Using: Featherless AI ({MODEL})")
+    print(f"\n🧪 Testing connection...\n")
+    
+    test = call_llm("Say 'Hello from Featherless!' in a friendly way.")
+    
+    if test:
+        print(f"✅ SUCCESS!\n{test}\n")
+    else:
+        print("❌ Test failed! Check your API key.")
