@@ -1,7 +1,21 @@
+# Python
 __pycache__/
 *.pyc
-cache.json
-config.py
-/config.py
-.env
+*.pyo
+*.pyd
+
+# Config / secrets
 notes_ai/config.py
+news_agent/config.py
+*.env
+
+# Generated files
+notes_ai/output/
+notes_ai/uploads/
+
+# Cache
+news_agent/cache.json
+
+# OS
+.DS_Store
+Thumbs.db
