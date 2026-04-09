@@ -1,4 +1,4 @@
-# 🔍 Fact-Check Agent 
+# 🔍 Fact-Check Agent and Notes Generating AI
 
 An AI-powered fact-checking system that verifies claims using official government and trusted sources.
 
